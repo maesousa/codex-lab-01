@@ -61,3 +61,37 @@ function topCategories(items, month, type, topN = 3) {
   arr.sort((a, b) => b.total - a.total);
   return arr.slice(0, topN);
 }
+function addMonths(yyyyMm, delta) {
+  const [y, m] = yyyyMm.split("-").map(Number);
+  const d = new Date(y, m - 1, 1);
+  d.setMonth(d.getMonth() + delta);
+  const yy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${yy}-${mm}`;
+}
+
+function lastNMonths(fromMonth, n = 6) {
+  const out = [];
+  for (let i = n - 1; i >= 0; i--) out.push(addMonths(fromMonth, -i));
+  return out;
+}
+
+function totalsByCategory(items, month, type) {
+  const map = new Map();
+  for (const x of items) {
+    if (x.type !== type) continue;
+    if (monthOf(x.date) !== month) continue;
+    map.set(x.category, (map.get(x.category) || 0) + x.amount);
+  }
+  const arr = [...map.entries()].map(([category, total]) => ({ category, total }));
+  arr.sort((a, b) => b.total - a.total);
+  return arr;
+}
+
+function topItems(items, month, type, topN = 5) {
+  const arr = items
+    .filter((x) => x.type === type && monthOf(x.date) === month)
+    .slice()
+    .sort((a, b) => b.amount - a.amount);
+  return arr.slice(0, topN);
+}
