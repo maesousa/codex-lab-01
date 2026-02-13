@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Controlo de Despesas Mensais</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="app">
+      <header class="header">
+        <div>
+          <h1>Controlo de Despesas</h1>
+          <p class="subtitle">Regista despesas e acompanha o total do mês.</p>
+        </div>
+        <button id="btnLimparTudo" class="btn btn-secondary" type="button" title="Remove todas as despesas">
+          Limpar tudo
+        </button>
+      </header>
+
+      <main class="grid">
+        <section class="card">
+          <h2>Adicionar despesa</h2>
+
+          <form id="formDespesa" class="form" autocomplete="off">
+            <label class="field">
+              <span>Descrição</span>
+              <input
+                id="descricao"
+                name="descricao"
+                type="text"
+                placeholder="Ex.: Supermercado"
+                maxlength="60"
+                required
+              />
+            </label>
+
+            <label class="field">
+              <span>Valor (€)</span>
+              <input
+                id="valor"
+                name="valor"
+                type="text"
+                inputmode="decimal"
+                placeholder="Ex.: 12,50"
+                required
+              />
+              <small class="hint">Aceita vírgula ou ponto (ex.: 12,50 ou 12.50)</small>
+            </label>
+
+            <button class="btn btn-primary" type="submit">Adicionar</button>
+            <p id="mensagem" class="message" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>Resumo</h2>
+            <div class="pill">
+              <span>Total do mês</span>
+              <strong id="total">0,00 €</strong>
+            </div>
+          </div>
+
+          <div class="list-header">
+            <div class="muted">Despesas</div>
+            <div class="muted" id="contador">0 itens</div>
+          </div>
+
+          <ul id="lista" class="list" aria-label="Lista de despesas"></ul>
+
+          <div id="emptyState" class="empty">
+            <p><strong>Sem despesas registadas.</strong></p>
+            <p>Adiciona a tua primeira despesa para começar.</p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span class="muted">Dados guardados localmente no teu navegador (localStorage).</span>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
