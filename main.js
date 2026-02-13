@@ -23,6 +23,14 @@ const counterEl = document.getElementById("counter");
 const emptyStateEl = document.getElementById("emptyState");
 const btnLimparTudo = document.getElementById("btnLimparTudo");
 
+const chartExpenseCategoriesEl = document.getElementById("chartExpenseCategories");
+const chartTrendEl = document.getElementById("chartTrend");
+const topExpensesItemsEl = document.getElementById("topExpensesItems");
+const topIncomeItemsEl = document.getElementById("topIncomeItems");
+
+let chartExpenseCategories = null;
+let chartTrend = null;
+
 let items = migrateIfNeeded();
 
 const state = {
@@ -60,6 +68,55 @@ function updateDashboard() {
   // Top categorias (mês selecionado)
   renderTopList(topExpensesEl, topCategories(items, state.month, "expense", 3));
   renderTopList(topIncomeEl, topCategories(items, state.month, "income", 3));
+
+    // Top items (mês selecionado)
+  renderTopItems(topExpensesItemsEl, topItems(items, state.month, "expense", 5));
+  renderTopItems(topIncomeItemsEl, topItems(items, state.month, "income", 5));
+
+  // Gráfico: despesas por categoria (mês)
+  const cat = totalsByCategory(items, state.month, "expense");
+  const labels = cat.map((x) => x.category);
+  const values = cat.map((x) => x.total);
+
+  if (chartExpenseCategories) chartExpenseCategories.destroy();
+  chartExpenseCategories = new Chart(chartExpenseCategoriesEl, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{ label: "€", data: values }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
+  });
+
+  // Gráfico: tendência últimos 6 meses
+  const months = lastNMonths(state.month, 6);
+  const expensesSeries = months.map((m) => totalsForMonth(items, m).expenses);
+  const incomeSeries = months.map((m) => totalsForMonth(items, m).income);
+  const balanceSeries = months.map((m) => totalsForMonth(items, m).balance);
+
+  if (chartTrend) chartTrend.destroy();
+  chartTrend = new Chart(chartTrendEl, {
+    type: "line",
+    data: {
+      labels: months,
+      datasets: [
+        { label: "Despesas", data: expensesSeries },
+        { label: "Receitas", data: incomeSeries },
+        { label: "Saldo", data: balanceSeries },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "bottom" } },
+    },
+  });
+  
 }
 
 function renderAll() {
