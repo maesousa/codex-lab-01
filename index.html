@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Controlo de Despesas Mensais</title>
+    <title>Finanças Pessoais — V2</title>
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -11,77 +11,132 @@
     <div class="app">
       <header class="header">
         <div>
-          <h1>Controlo de Despesas</h1>
-          <p class="subtitle">Regista despesas e acompanha o total do mês.</p>
+          <h1>Finanças Pessoais</h1>
+          <p class="subtitle">Despesas e receitas com filtros mensais e resumo.</p>
         </div>
-        <button id="btnLimparTudo" class="btn btn-secondary" type="button" title="Remove todas as despesas">
+
+        <button id="btnLimparTudo" class="btn btn-secondary" type="button" title="Remove todos os registos">
           Limpar tudo
         </button>
       </header>
 
       <main class="grid">
         <section class="card">
-          <h2>Adicionar despesa</h2>
+          <h2>Novo registo</h2>
 
-          <form id="formDespesa" class="form" autocomplete="off">
+          <form id="form" class="form" autocomplete="off">
+            <div class="row2">
+              <label class="field">
+                <span>Tipo</span>
+                <select id="type" name="type" required>
+                  <option value="expense">Despesa</option>
+                  <option value="income">Receita</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Data</span>
+                <input id="date" name="date" type="date" required />
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Categoria</span>
+              <select id="category" name="category" required></select>
+            </label>
+
             <label class="field">
               <span>Descrição</span>
               <input
-                id="descricao"
-                name="descricao"
+                id="description"
+                name="description"
                 type="text"
-                placeholder="Ex.: Supermercado"
-                maxlength="60"
+                placeholder="Ex.: Supermercado / Salário"
+                maxlength="80"
                 required
               />
             </label>
 
             <label class="field">
               <span>Valor (€)</span>
-              <input
-                id="valor"
-                name="valor"
-                type="text"
-                inputmode="decimal"
-                placeholder="Ex.: 12,50"
-                required
-              />
+              <input id="amount" name="amount" type="text" inputmode="decimal" placeholder="Ex.: 12,50" required />
               <small class="hint">Aceita vírgula ou ponto (ex.: 12,50 ou 12.50)</small>
             </label>
 
             <button class="btn btn-primary" type="submit">Adicionar</button>
-            <p id="mensagem" class="message" aria-live="polite"></p>
+            <p id="message" class="message" aria-live="polite"></p>
           </form>
         </section>
 
         <section class="card">
           <div class="card-header">
-            <h2>Resumo</h2>
-            <div class="pill">
-              <span>Total do mês</span>
-              <strong id="total">0,00 €</strong>
+            <h2>Dashboard do mês</h2>
+            <div class="filters">
+              <label class="field compact">
+                <span>Mês</span>
+                <input id="month" type="month" />
+              </label>
+
+              <label class="field compact">
+                <span>Tipo</span>
+                <select id="typeFilter">
+                  <option value="all">Todos</option>
+                  <option value="expense">Despesas</option>
+                  <option value="income">Receitas</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="summary">
+            <div class="kpi">
+              <div class="kpi-label">Despesas</div>
+              <div id="kpiExpenses" class="kpi-value">0,00 €</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Receitas</div>
+              <div id="kpiIncome" class="kpi-value">0,00 €</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Saldo</div>
+              <div id="kpiBalance" class="kpi-value">0,00 €</div>
+            </div>
+          </div>
+
+          <div class="tops">
+            <div class="topbox">
+              <div class="top-title">Top 3 categorias — Despesa</div>
+              <ol id="topExpenses" class="toplist"></ol>
+            </div>
+            <div class="topbox">
+              <div class="top-title">Top 3 categorias — Receita</div>
+              <ol id="topIncome" class="toplist"></ol>
             </div>
           </div>
 
           <div class="list-header">
-            <div class="muted">Despesas</div>
-            <div class="muted" id="contador">0 itens</div>
+            <div class="muted">Registos</div>
+            <div class="muted" id="counter">0 itens</div>
           </div>
 
-          <ul id="lista" class="list" aria-label="Lista de despesas"></ul>
+          <ul id="list" class="list" aria-label="Lista de registos"></ul>
 
           <div id="emptyState" class="empty">
-            <p><strong>Sem despesas registadas.</strong></p>
-            <p>Adiciona a tua primeira despesa para começar.</p>
+            <p><strong>Sem registos neste filtro.</strong></p>
+            <p>Adiciona um registo ou altera o mês/tipo.</p>
           </div>
         </section>
       </main>
 
       <footer class="footer">
-        <span class="muted">Dados guardados localmente no teu navegador (localStorage).</span>
+        <span class="muted">Dados guardados localmente (localStorage). V2 com migração automática da V1.</span>
       </footer>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Ordem importante -->
+    <script src="storage.js"></script>
+    <script src="domain.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
   </body>
 </html>
