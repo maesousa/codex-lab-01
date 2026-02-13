@@ -97,3 +97,21 @@ function renderList(ulEl, items, onDelete) {
     ulEl.appendChild(li);
   }
 }
+function renderTopItems(olEl, items) {
+  olEl.innerHTML = "";
+  if (!items.length) {
+    const li = document.createElement("li");
+    li.textContent = "—";
+    olEl.appendChild(li);
+    return;
+  }
+  for (const x of items) {
+    const li = document.createElement("li");
+    li.textContent = x.description;
+    const span = document.createElement("span");
+    span.className = "muted";
+    span.textContent = `(${formatEuro(x.amount)} • ${x.category})`;
+    li.appendChild(span);
+    olEl.appendChild(li);
+  }
+}
