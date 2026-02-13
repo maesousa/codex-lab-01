@@ -1,6 +1,5 @@
 // main.js
 
-// Chart.js em tema escuro
 Chart.defaults.color = "rgba(255,255,255,0.80)";
 Chart.defaults.borderColor = "rgba(255,255,255,0.14)";
 
@@ -37,6 +36,15 @@ const btnBackupJson = document.getElementById("btnBackupJson");
 const fileRestore = document.getElementById("fileRestore");
 const btnLimparTudo = document.getElementById("btnLimparTudo");
 
+// Mobile menu
+const btnMenu = document.getElementById("btnMenu");
+const headerActions = document.getElementById("headerActions");
+
+// Modal + FAB
+const fabAdd = document.getElementById("fabAdd");
+const modal = document.getElementById("modal");
+const btnCloseModal = document.getElementById("btnCloseModal");
+
 // ESTADO
 let items = migrateIfNeeded();
 
@@ -44,9 +52,7 @@ let items = migrateIfNeeded();
 {
   const norm = normalizeAll(items);
   items = norm.items;
-  if (norm.changed) {
-    saveV2(items);
-  }
+  if (norm.changed) saveV2(items);
 }
 
 const state = {
@@ -60,6 +66,56 @@ let chartTrend = null;
 function persist() {
   saveV2(items);
 }
+
+// MENU MOBILE
+function toggleMenu(open) {
+  const isOpen = headerActions.classList.contains("open");
+  const next = open ?? !isOpen;
+  headerActions.classList.toggle("open", next);
+  btnMenu.setAttribute("aria-expanded", String(next));
+}
+
+btnMenu?.addEventListener("click", () => toggleMenu());
+document.addEventListener("click", (e) => {
+  if (!headerActions.classList.contains("open")) return;
+  const within = headerActions.contains(e.target) || btnMenu.contains(e.target);
+  if (!within) toggleMenu(false);
+});
+
+// MODAL
+function openModal() {
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+
+  // defaults
+  dateEl.value = todayIso();
+  typeEl.value = "expense";
+  fillCategorySelect(categoryEl, "expense");
+  descriptionEl.value = "";
+  amountEl.value = "";
+  messageEl.textContent = "";
+  messageEl.classList.remove("ok", "err");
+
+  window.setTimeout(() => descriptionEl.focus(), 50);
+}
+
+function closeModal() {
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+fabAdd.addEventListener("click", openModal);
+btnCloseModal.addEventListener("click", closeModal);
+
+// fechar ao clicar no backdrop (ou element com data-close)
+modal.addEventListener("click", (e) => {
+  if (e.target && e.target.dataset && e.target.dataset.close === "true") closeModal();
+});
+
+// ESC fecha modal
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && modal.classList.contains("open")) closeModal();
+});
 
 // EXPORT / BACKUP / RESTORE
 function downloadFile(filename, content, type) {
@@ -114,7 +170,6 @@ function restoreJson(file) {
 
 // RENDER
 function updateDashboard() {
-  // Lista filtrada (mês + tipo)
   const filtered = applyFilters(items, state);
 
   renderList(listEl, filtered, (x) => {
@@ -130,21 +185,17 @@ function updateDashboard() {
   counterEl.textContent = n === 1 ? "1 item" : `${n} itens`;
   emptyStateEl.style.display = n === 0 ? "block" : "none";
 
-  // KPIs do mês selecionado (independente do filtro tipo)
   const totals = totalsForMonth(items, state.month);
   kpiExpensesEl.textContent = formatEuro(totals.expenses);
   kpiIncomeEl.textContent = formatEuro(totals.income);
   kpiBalanceEl.textContent = formatEuro(totals.balance);
 
-  // Top categorias (mês)
   renderTopList(topExpensesEl, topCategories(items, state.month, "expense", 3));
   renderTopList(topIncomeEl, topCategories(items, state.month, "income", 3));
 
-  // Top items (mês)
   renderTopItems(topExpensesItemsEl, topItems(items, state.month, "expense", 5));
   renderTopItems(topIncomeItemsEl, topItems(items, state.month, "income", 5));
 
-  // Gráfico: despesas por categoria (mês)
   const cat = totalsByCategory(items, state.month, "expense");
   const labels = cat.map((x) => x.category);
   const values = cat.map((x) => x.total);
@@ -152,10 +203,7 @@ function updateDashboard() {
   if (chartExpenseCategories) chartExpenseCategories.destroy();
   chartExpenseCategories = new Chart(chartExpenseCategoriesEl, {
     type: "bar",
-    data: {
-      labels,
-      datasets: [{ label: "€", data: values }],
-    },
+    data: { labels, datasets: [{ label: "€", data: values }] },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
@@ -163,7 +211,6 @@ function updateDashboard() {
     },
   });
 
-  // Gráfico: tendência últimos 6 meses (cores explícitas para distinguir)
   const months = lastNMonths(state.month, 6);
   const expensesSeries = months.map((m) => totalsForMonth(items, m).expenses);
   const incomeSeries = months.map((m) => totalsForMonth(items, m).income);
@@ -204,9 +251,7 @@ function updateDashboard() {
     options: {
       responsive: true,
       plugins: { legend: { position: "bottom" } },
-      scales: {
-        y: { beginAtZero: true },
-      },
+      scales: { y: { beginAtZero: true } },
     },
   });
 }
@@ -217,10 +262,6 @@ function renderAll() {
 
 // INIT
 function initDefaults() {
-  dateEl.value = todayIso();
-  typeEl.value = "expense";
-  fillCategorySelect(categoryEl, "expense");
-
   monthEl.value = state.month;
   typeFilterEl.value = state.typeFilter;
 }
@@ -265,23 +306,19 @@ form.addEventListener("submit", (e) => {
   });
 
   persist();
-
-  descriptionEl.value = "";
-  amountEl.value = "";
-  descriptionEl.focus();
-
   renderAll();
+
   setMessage(messageEl, "Registo adicionado.", "ok");
+  window.setTimeout(closeModal, 250);
 });
 
 btnLimparTudo.addEventListener("click", () => {
-  if (!items.length) return setMessage(messageEl, "Não há registos para limpar.", "err");
+  if (!items.length) return;
   const ok = window.confirm("Tens a certeza que queres remover todos os registos?");
   if (!ok) return;
   items = [];
   persist();
   renderAll();
-  setMessage(messageEl, "Tudo limpo.", "ok");
 });
 
 btnExportCsv.addEventListener("click", exportCsv);
