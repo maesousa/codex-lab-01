@@ -10,74 +10,33 @@
   <body>
     <div class="app">
       <header class="header">
-        <div>
+        <div class="header-left">
           <h1>Finanças Pessoais</h1>
           <p class="subtitle">Dashboard mensal com análise, exportação e backup.</p>
         </div>
 
-        <div class="header-actions">
-          <button id="btnExportCsv" class="btn btn-secondary" type="button">Exportar CSV</button>
-          <button id="btnBackupJson" class="btn btn-secondary" type="button">Backup JSON</button>
+        <div class="header-right">
+          <div class="header-actions" id="headerActions">
+            <button id="btnExportCsv" class="btn btn-secondary" type="button">Exportar CSV</button>
+            <button id="btnBackupJson" class="btn btn-secondary" type="button">Backup JSON</button>
 
-          <label class="btn btn-secondary file-btn" title="Restaurar a partir de backup JSON">
-            Restaurar JSON
-            <input id="fileRestore" type="file" accept="application/json" hidden />
-          </label>
+            <label class="btn btn-secondary file-btn" title="Restaurar a partir de backup JSON">
+              Restaurar JSON
+              <input id="fileRestore" type="file" accept="application/json" hidden />
+            </label>
 
-          <button id="btnLimparTudo" class="btn btn-secondary" type="button" title="Remove todos os registos">
-            Limpar tudo
+            <button id="btnLimparTudo" class="btn btn-secondary" type="button" title="Remove todos os registos">
+              Limpar tudo
+            </button>
+          </div>
+
+          <button id="btnMenu" class="btn btn-icon btn-secondary menu-btn" type="button" aria-expanded="false" aria-controls="headerActions">
+            ☰
           </button>
         </div>
       </header>
 
       <main class="grid">
-        <section class="card">
-          <h2>Novo registo</h2>
-
-          <form id="form" class="form" autocomplete="off">
-            <div class="row2">
-              <label class="field">
-                <span>Tipo</span>
-                <select id="type" name="type" required>
-                  <option value="expense">Despesa</option>
-                  <option value="income">Receita</option>
-                </select>
-              </label>
-
-              <label class="field">
-                <span>Data</span>
-                <input id="date" name="date" type="date" required />
-              </label>
-            </div>
-
-            <label class="field">
-              <span>Categoria</span>
-              <select id="category" name="category" required></select>
-            </label>
-
-            <label class="field">
-              <span>Descrição</span>
-              <input
-                id="description"
-                name="description"
-                type="text"
-                placeholder="Ex.: Supermercado / Salário"
-                maxlength="80"
-                required
-              />
-            </label>
-
-            <label class="field">
-              <span>Valor (€)</span>
-              <input id="amount" name="amount" type="text" inputmode="decimal" placeholder="Ex.: 12,50" required />
-              <small class="hint">Aceita vírgula ou ponto (ex.: 12,50 ou 12.50)</small>
-            </label>
-
-            <button class="btn btn-primary" type="submit">Adicionar</button>
-            <p id="message" class="message" aria-live="polite"></p>
-          </form>
-        </section>
-
         <section class="card">
           <div class="card-header">
             <h2>Dashboard do mês</h2>
@@ -137,7 +96,7 @@
             </div>
           </div>
 
-          <div class="tops" style="margin-top: 12px;">
+          <div class="tops tops2">
             <div class="topbox">
               <div class="top-title">Top 5 despesas (mês)</div>
               <ol id="topExpensesItems" class="toplist"></ol>
@@ -165,6 +124,64 @@
       <footer class="footer">
         <span class="muted">Dados guardados localmente (localStorage). Podes exportar CSV e fazer backup JSON.</span>
       </footer>
+
+      <!-- FAB (mobile + desktop) -->
+      <button id="fabAdd" class="fab" type="button" aria-label="Adicionar registo">＋</button>
+
+      <!-- MODAL -->
+      <div id="modal" class="modal" aria-hidden="true">
+        <div class="modal-backdrop" data-close="true"></div>
+
+        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+          <div class="modal-header">
+            <h2 id="modalTitle">Novo registo</h2>
+            <button id="btnCloseModal" class="btn btn-icon btn-secondary" type="button" aria-label="Fechar">✕</button>
+          </div>
+
+          <form id="form" class="form" autocomplete="off">
+            <div class="row2">
+              <label class="field">
+                <span>Tipo</span>
+                <select id="type" name="type" required>
+                  <option value="expense">Despesa</option>
+                  <option value="income">Receita</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Data</span>
+                <input id="date" name="date" type="date" required />
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Categoria</span>
+              <select id="category" name="category" required></select>
+            </label>
+
+            <label class="field">
+              <span>Descrição</span>
+              <input
+                id="description"
+                name="description"
+                type="text"
+                placeholder="Ex.: Supermercado / Salário"
+                maxlength="80"
+                required
+              />
+            </label>
+
+            <label class="field">
+              <span>Valor (€)</span>
+              <input id="amount" name="amount" type="text" inputmode="decimal" placeholder="Ex.: 12,50" required />
+              <small class="hint">Aceita vírgula ou ponto (ex.: 12,50 ou 12.50)</small>
+            </label>
+
+            <button class="btn btn-primary btn-block" type="submit">Adicionar</button>
+            <p id="message" class="message" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
