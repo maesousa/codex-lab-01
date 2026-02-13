@@ -114,6 +114,30 @@
             </div>
           </div>
 
+<div class="charts">
+  <div class="chartbox">
+    <div class="chart-title">Despesas por categoria (mês)</div>
+    <canvas id="chartExpenseCategories" height="140"></canvas>
+  </div>
+
+  <div class="chartbox">
+    <div class="chart-title">Tendência (últimos 6 meses)</div>
+    <canvas id="chartTrend" height="140"></canvas>
+  </div>
+</div>
+
+<div class="tops" style="margin-top: 12px;">
+  <div class="topbox">
+    <div class="top-title">Top 5 despesas (mês)</div>
+    <ol id="topExpensesItems" class="toplist"></ol>
+  </div>
+  <div class="topbox">
+    <div class="top-title">Top 5 receitas (mês)</div>
+    <ol id="topIncomeItems" class="toplist"></ol>
+  </div>
+</div>
+
+          
           <div class="list-header">
             <div class="muted">Registos</div>
             <div class="muted" id="counter">0 itens</div>
@@ -134,6 +158,7 @@
     </div>
 
     <!-- Ordem importante -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="storage.js"></script>
     <script src="domain.js"></script>
     <script src="ui.js"></script>
