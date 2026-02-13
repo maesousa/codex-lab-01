@@ -1,215 +1,193 @@
-:root {
-  --bg: #0b1220;
-  --card: rgba(255, 255, 255, 0.06);
-  --card-strong: rgba(255, 255, 255, 0.09);
-  --text: rgba(255, 255, 255, 0.92);
-  --muted: rgba(255, 255, 255, 0.68);
-  --border: rgba(255, 255, 255, 0.12);
-  --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-  --radius: 18px;
-  --radius-sm: 12px;
-  --focus: rgba(255, 255, 255, 0.25);
-  --danger-bg: rgba(255, 80, 80, 0.15);
-}
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Finanças Pessoais</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+  <body>
+    <div class="app">
+      <header class="header">
+        <div class="header-left">
+          <h1>Finanças Pessoais</h1>
+          <p class="subtitle">Dashboard mensal com análise, exportação e backup.</p>
+        </div>
 
-body {
-  margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  color: var(--text);
-  background:
-    radial-gradient(1100px 700px at 20% 10%, rgba(90, 220, 140, 0.18), transparent 55%),
-    radial-gradient(900px 600px at 85% 35%, rgba(120, 160, 255, 0.18), transparent 55%),
-    radial-gradient(900px 700px at 40% 95%, rgba(255, 180, 80, 0.12), transparent 60%),
-    var(--bg);
-}
+        <div class="header-right">
+          <div class="header-actions" id="headerActions">
+            <button id="btnExportCsv" class="btn btn-secondary" type="button">Exportar CSV</button>
+            <button id="btnBackupJson" class="btn btn-secondary" type="button">Backup JSON</button>
 
-.app { max-width: 1120px; margin: 0 auto; padding: 28px 18px 42px; }
+            <label class="btn btn-secondary file-btn" title="Restaurar a partir de backup JSON">
+              Restaurar JSON
+              <input id="fileRestore" type="file" accept="application/json" hidden />
+            </label>
 
-.header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 14px; margin-bottom: 18px;
-}
+            <button id="btnLimparTudo" class="btn btn-secondary" type="button" title="Remove todos os registos">
+              Limpar tudo
+            </button>
+          </div>
 
-h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
-.subtitle { margin: 6px 0 0; color: var(--muted); }
+          <button id="btnMenu" class="btn btn-icon btn-secondary menu-btn" type="button" aria-expanded="false" aria-controls="headerActions">
+            ☰
+          </button>
+        </div>
+      </header>
 
-.header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.file-btn { cursor: pointer; }
+      <main class="grid">
+        <section class="card">
+          <div class="card-header">
+            <h2>Dashboard do mês</h2>
 
-.grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 900px) {
-  .grid { grid-template-columns: 360px 1fr; align-items: start; }
-}
+            <div class="filters">
+              <label class="field compact">
+                <span>Mês</span>
+                <input id="month" type="month" />
+              </label>
 
-.card {
-  background: linear-gradient(180deg, var(--card-strong), var(--card));
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
-}
+              <label class="field compact">
+                <span>Tipo</span>
+                <select id="typeFilter">
+                  <option value="all">Todos</option>
+                  <option value="expense">Despesas</option>
+                  <option value="income">Receitas</option>
+                </select>
+              </label>
+            </div>
+          </div>
 
-.card h2 { margin: 0 0 12px; font-size: 18px; letter-spacing: -0.01em; }
+          <div class="summary">
+            <div class="kpi">
+              <div class="kpi-label">Despesas</div>
+              <div id="kpiExpenses" class="kpi-value">0,00 €</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Receitas</div>
+              <div id="kpiIncome" class="kpi-value">0,00 €</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Saldo</div>
+              <div id="kpiBalance" class="kpi-value">0,00 €</div>
+            </div>
+          </div>
 
-.card-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 12px; margin-bottom: 12px;
-}
+          <div class="charts">
+            <div class="chartbox">
+              <div class="chart-title">Despesas por categoria (mês)</div>
+              <canvas id="chartExpenseCategories" height="140"></canvas>
+            </div>
 
-.form { display: grid; gap: 12px; }
-.row2 { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+            <div class="chartbox">
+              <div class="chart-title">Tendência (últimos 6 meses)</div>
+              <canvas id="chartTrend" height="140"></canvas>
+            </div>
+          </div>
 
-.field span { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+          <div class="tops">
+            <div class="topbox">
+              <div class="top-title">Top 3 categorias — Despesa</div>
+              <ol id="topExpenses" class="toplist"></ol>
+            </div>
+            <div class="topbox">
+              <div class="top-title">Top 3 categorias — Receita</div>
+              <ol id="topIncome" class="toplist"></ol>
+            </div>
+          </div>
 
-input, select {
-  width: 100%;
-  padding: 12px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.18);
-  color: var(--text);
-  outline: none;
-}
+          <div class="tops tops2">
+            <div class="topbox">
+              <div class="top-title">Top 5 despesas (mês)</div>
+              <ol id="topExpensesItems" class="toplist"></ol>
+            </div>
+            <div class="topbox">
+              <div class="top-title">Top 5 receitas (mês)</div>
+              <ol id="topIncomeItems" class="toplist"></ol>
+            </div>
+          </div>
 
-input:focus, select:focus {
-  border-color: var(--focus);
-  box-shadow: 0 0 0 4px rgba(255,255,255,0.08);
-}
+          <div class="list-header">
+            <div class="muted">Registos</div>
+            <div class="muted" id="counter">0 itens</div>
+          </div>
 
-.hint { display: block; margin-top: 6px; font-size: 12px; color: rgba(255, 255, 255, 0.55); }
+          <ul id="list" class="list" aria-label="Lista de registos"></ul>
 
-.btn {
-  appearance: none;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  cursor: pointer;
-  transition: transform 0.04s ease, background 0.15s ease, border-color 0.15s ease;
-  user-select: none;
-}
-.btn:hover { background: rgba(255, 255, 255, 0.09); border-color: rgba(255, 255, 255, 0.18); }
-.btn:active { transform: translateY(1px); }
+          <div id="emptyState" class="empty">
+            <p><strong>Sem registos neste filtro.</strong></p>
+            <p>Adiciona um registo ou altera o mês/tipo.</p>
+          </div>
+        </section>
+      </main>
 
-.btn-primary { border-color: rgba(90, 220, 140, 0.35); background: rgba(90, 220, 140, 0.18); }
-.btn-primary:hover { background: rgba(90, 220, 140, 0.22); border-color: rgba(90, 220, 140, 0.48); }
+      <footer class="footer">
+        <span class="muted">Dados guardados localmente (localStorage). Podes exportar CSV e fazer backup JSON.</span>
+      </footer>
 
-.message { margin: 0; min-height: 18px; font-size: 13px; color: var(--muted); }
-.message.ok { color: rgba(90, 220, 140, 0.95); }
-.message.err { color: rgba(255, 120, 120, 0.95); }
+      <!-- FAB (mobile + desktop) -->
+      <button id="fabAdd" class="fab" type="button" aria-label="Adicionar registo">＋</button>
 
-.filters { display: flex; gap: 10px; flex-wrap: wrap; }
-.field.compact input, .field.compact select { padding: 10px 10px; }
+      <!-- MODAL -->
+      <div id="modal" class="modal" aria-hidden="true">
+        <div class="modal-backdrop" data-close="true"></div>
 
-.summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 10px 0 12px;
-}
-@media (max-width: 560px) { .summary { grid-template-columns: 1fr; } }
+        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+          <div class="modal-header">
+            <h2 id="modalTitle">Novo registo</h2>
+            <button id="btnCloseModal" class="btn btn-icon btn-secondary" type="button" aria-label="Fechar">✕</button>
+          </div>
 
-.kpi {
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.14);
-}
-.kpi-label { font-size: 12px; color: var(--muted); }
-.kpi-value { margin-top: 6px; font-size: 18px; font-variant-numeric: tabular-nums; }
+          <form id="form" class="form" autocomplete="off">
+            <div class="row2">
+              <label class="field">
+                <span>Tipo</span>
+                <select id="type" name="type" required>
+                  <option value="expense">Despesa</option>
+                  <option value="income">Receita</option>
+                </select>
+              </label>
 
-.charts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 10px 0 12px;
-}
-@media (max-width: 860px) { .charts { grid-template-columns: 1fr; } }
+              <label class="field">
+                <span>Data</span>
+                <input id="date" name="date" type="date" required />
+              </label>
+            </div>
 
-.chartbox {
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.14);
-}
-.chart-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+            <label class="field">
+              <span>Categoria</span>
+              <select id="category" name="category" required></select>
+            </label>
 
-.tops { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-@media (max-width: 760px) { .tops { grid-template-columns: 1fr; } }
+            <label class="field">
+              <span>Descrição</span>
+              <input
+                id="description"
+                name="description"
+                type="text"
+                placeholder="Ex.: Supermercado / Salário"
+                maxlength="80"
+                required
+              />
+            </label>
 
-.topbox {
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.14);
-}
-.top-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-.toplist { margin: 0; padding-left: 18px; }
-.toplist li { margin: 6px 0; }
-.toplist .muted { margin-left: 6px; font-size: 12px; }
+            <label class="field">
+              <span>Valor (€)</span>
+              <input id="amount" name="amount" type="text" inputmode="decimal" placeholder="Ex.: 12,50" required />
+              <small class="hint">Aceita vírgula ou ponto (ex.: 12,50 ou 12.50)</small>
+            </label>
 
-.list-header {
-  display: flex; justify-content: space-between; align-items: baseline;
-  margin: 12px 2px 8px;
-}
-.muted { color: var(--muted); }
+            <button class="btn btn-primary btn-block" type="submit">Adicionar</button>
+            <p id="message" class="message" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </div>
 
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.14);
-}
-
-.item-main { display: grid; gap: 6px; }
-
-.item-title { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; }
-.item-title strong { font-size: 14px; }
-
-.badge {
-  font-size: 12px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--muted);
-}
-
-.item-meta { font-size: 12px; color: var(--muted); }
-
-.amount { font-variant-numeric: tabular-nums; }
-
-.actions { display: flex; align-items: start; gap: 8px; }
-.btn-icon { border-radius: 12px; padding: 8px 10px; background: rgba(255, 255, 255, 0.06); }
-
-.btn-danger {
-  border-color: rgba(255, 80, 80, 0.35);
-  background: var(--danger-bg);
-}
-.btn-danger:hover { border-color: rgba(255, 80, 80, 0.55); background: rgba(255, 80, 80, 0.20); }
-
-.empty {
-  margin-top: 12px;
-  padding: 14px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px dashed rgba(255, 255, 255, 0.18);
-  color: var(--muted);
-}
-
-.footer { margin-top: 14px; text-align: center; font-size: 12px; color: rgba(255, 255, 255, 0.60); }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="storage.js"></script>
+    <script src="domain.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
