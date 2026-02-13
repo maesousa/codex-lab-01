@@ -1,6 +1,4 @@
 // ui.js
-// Renderização e helpers de UI (DOM)
-
 function setMessage(el, text, type = "") {
   el.textContent = text;
   el.classList.remove("ok", "err");
@@ -11,7 +9,7 @@ function setMessage(el, text, type = "") {
     setMessage._t = window.setTimeout(() => {
       el.textContent = "";
       el.classList.remove("ok", "err");
-    }, 2800);
+    }, 2600);
   }
 }
 
@@ -44,6 +42,25 @@ function renderTopList(olEl, items) {
   }
 }
 
+function renderTopItems(olEl, items) {
+  olEl.innerHTML = "";
+  if (!items.length) {
+    const li = document.createElement("li");
+    li.textContent = "—";
+    olEl.appendChild(li);
+    return;
+  }
+  for (const x of items) {
+    const li = document.createElement("li");
+    li.textContent = x.description;
+    const span = document.createElement("span");
+    span.className = "muted";
+    span.textContent = `(${formatEuro(Number(x.amount) || 0)} • ${x.category})`;
+    li.appendChild(span);
+    olEl.appendChild(li);
+  }
+}
+
 function renderList(ulEl, items, onDelete) {
   ulEl.innerHTML = "";
 
@@ -66,7 +83,7 @@ function renderList(ulEl, items, onDelete) {
 
     const amount = document.createElement("span");
     amount.className = "amount";
-    amount.textContent = formatEuro(x.amount);
+    amount.textContent = formatEuro(Number(x.amount) || 0);
 
     title.appendChild(desc);
     title.appendChild(badge);
@@ -86,7 +103,6 @@ function renderList(ulEl, items, onDelete) {
     btn.type = "button";
     btn.className = "btn btn-icon btn-danger";
     btn.textContent = "Apagar";
-    btn.title = "Remover este registo";
     btn.addEventListener("click", () => onDelete(x));
 
     actions.appendChild(btn);
@@ -95,23 +111,5 @@ function renderList(ulEl, items, onDelete) {
     li.appendChild(actions);
 
     ulEl.appendChild(li);
-  }
-}
-function renderTopItems(olEl, items) {
-  olEl.innerHTML = "";
-  if (!items.length) {
-    const li = document.createElement("li");
-    li.textContent = "—";
-    olEl.appendChild(li);
-    return;
-  }
-  for (const x of items) {
-    const li = document.createElement("li");
-    li.textContent = x.description;
-    const span = document.createElement("span");
-    span.className = "muted";
-    span.textContent = `(${formatEuro(x.amount)} • ${x.category})`;
-    li.appendChild(span);
-    olEl.appendChild(li);
   }
 }
