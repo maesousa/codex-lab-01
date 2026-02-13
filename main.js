@@ -1,6 +1,6 @@
 // main.js
 
-// Chart.js em tema escuro (para não ficar “invisível”)
+// Chart.js em tema escuro
 Chart.defaults.color = "rgba(255,255,255,0.80)";
 Chart.defaults.borderColor = "rgba(255,255,255,0.14)";
 
@@ -39,6 +39,15 @@ const btnLimparTudo = document.getElementById("btnLimparTudo");
 
 // ESTADO
 let items = migrateIfNeeded();
+
+// Normaliza dados antigos
+{
+  const norm = normalizeAll(items);
+  items = norm.items;
+  if (norm.changed) {
+    saveV2(items);
+  }
+}
 
 const state = {
   month: currentMonthIso(),
@@ -88,18 +97,8 @@ function restoreJson(file) {
       const data = JSON.parse(e.target.result);
       if (!Array.isArray(data)) throw new Error("Formato inválido");
 
-      // sanity: tenta normalizar campos essenciais
-      items = data
-        .map((x) => ({
-          id: String(x.id ?? makeId()),
-          type: x.type === "income" ? "income" : "expense",
-          date: String(x.date ?? todayIso()).slice(0, 10),
-          category: String(x.category ?? "Outros"),
-          description: String(x.description ?? ""),
-          amount: Number(x.amount) || 0,
-          createdAt: Number(x.createdAt) || Date.now(),
-        }))
-        .filter((x) => x.amount > 0);
+      const norm = normalizeAll(data);
+      items = norm.items.filter((x) => (Number(x.amount) || 0) > 0);
 
       persist();
       renderAll();
@@ -160,13 +159,11 @@ function updateDashboard() {
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true },
-      },
+      scales: { y: { beginAtZero: true } },
     },
   });
 
-  // Gráfico: tendência últimos 6 meses
+  // Gráfico: tendência últimos 6 meses (cores explícitas para distinguir)
   const months = lastNMonths(state.month, 6);
   const expensesSeries = months.map((m) => totalsForMonth(items, m).expenses);
   const incomeSeries = months.map((m) => totalsForMonth(items, m).income);
@@ -178,14 +175,38 @@ function updateDashboard() {
     data: {
       labels: months,
       datasets: [
-        { label: "Despesas", data: expensesSeries, tension: 0.25 },
-        { label: "Receitas", data: incomeSeries, tension: 0.25 },
-        { label: "Saldo", data: balanceSeries, tension: 0.25 },
+        {
+          label: "Despesas",
+          data: expensesSeries,
+          borderColor: "#4ea1ff",
+          backgroundColor: "rgba(78,161,255,0.15)",
+          pointBackgroundColor: "#4ea1ff",
+          tension: 0.25,
+        },
+        {
+          label: "Receitas",
+          data: incomeSeries,
+          borderColor: "#ff4f8b",
+          backgroundColor: "rgba(255,79,139,0.14)",
+          pointBackgroundColor: "#ff4f8b",
+          tension: 0.25,
+        },
+        {
+          label: "Saldo",
+          data: balanceSeries,
+          borderColor: "#ffb44c",
+          backgroundColor: "rgba(255,180,76,0.12)",
+          pointBackgroundColor: "#ffb44c",
+          tension: 0.25,
+        },
       ],
     },
     options: {
       responsive: true,
       plugins: { legend: { position: "bottom" } },
+      scales: {
+        y: { beginAtZero: true },
+      },
     },
   });
 }
@@ -221,7 +242,7 @@ typeFilterEl.addEventListener("change", () => {
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const type = typeEl.value; // expense|income
+  const type = typeEl.value;
   const date = dateEl.value;
   const category = categoryEl.value;
   const description = descriptionEl.value.trim();
